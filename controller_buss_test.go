@@ -18,6 +18,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/muyu66/two-way-score"
 )
 
 type BussSuite struct {
@@ -108,6 +110,9 @@ func (s *BussSuite) Test() {
 
 	var d = toFullGraph(dg, 1)
 	fmt.Printf("%+v\n", d)
+
+	main.Calc()
+
 }
 
 type Asd struct {

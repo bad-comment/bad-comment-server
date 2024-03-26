@@ -32,7 +32,7 @@ func (SubjectComment) TableName() string {
 }
 
 type UserScore struct {
-	UserId int64 `json:"user_id" gorm:"column:user_id;type:bigint"`
+	UserId int64 `json:"user_id" gorm:"column:user_id;primaryKey;type:bigint"`
 	Score  int64 `json:"score" gorm:"column:score;type:bigint;not null"`
 }
 

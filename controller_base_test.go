@@ -94,12 +94,12 @@ func (s *Suite) TestCreateSubject() {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set("userId", 1)
+	c.Set("userId", int64(1))
 	ctl := &controller{db: s.db}
 
 	if assert.NoError(s.T(), ctl.createSubject(c)) {
 		assert.Equal(s.T(), http.StatusOK, rec.Code)
-		assert.Equal(s.T(), "{\"id\":0,\"name\":\"iphone 15p\",\"created_by\":1}\n", rec.Body.String())
+		assert.Equal(s.T(), "{\"id\":2,\"name\":\"iphone 15p\",\"created_by\":1}\n", rec.Body.String())
 	}
 }
 
@@ -111,7 +111,7 @@ func (s *Suite) TestGetSubjectByRandom() {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set("userId", 1)
+	c.Set("userId", int64(1))
 	ctl := &controller{db: s.db}
 
 	if assert.NoError(s.T(), ctl.getSubjectByRandom(c)) {
@@ -128,7 +128,7 @@ func (s *Suite) TestCreateSubjectComment() {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set("userId", 1)
+	c.Set("userId", int64(1))
 	c.SetPath("/subjects/:subjectId/comments")
 	c.SetParamNames("subjectId")
 	c.SetParamValues("2")
@@ -136,7 +136,7 @@ func (s *Suite) TestCreateSubjectComment() {
 
 	if assert.NoError(s.T(), ctl.createSubjectComment(c)) {
 		assert.Equal(s.T(), http.StatusOK, rec.Code)
-		assert.Equal(s.T(), "{\"id\":0,\"user_id\":1,\"subject_id\":2,\"score\":1}\n", rec.Body.String())
+		assert.Equal(s.T(), "{\"id\":1,\"user_id\":1,\"subject_id\":2,\"score\":1}\n", rec.Body.String())
 	}
 }
 

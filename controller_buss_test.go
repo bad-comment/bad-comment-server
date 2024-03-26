@@ -11,15 +11,12 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"slices"
 	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/muyu66/two-way-score"
 )
 
 type BussSuite struct {
@@ -52,7 +49,7 @@ func (s *BussSuite) Test() {
 	ctl := &controller{db: s.db}
 
 	// 生成用户
-	for i := 1; i <= 20; i++ {
+	for i := 1; i <= 100; i++ {
 		body := fmt.Sprintf(`{"account":"biubiu%s","password":"123456"}`, strconv.Itoa(i))
 		c := testPost(e, body)
 
@@ -62,138 +59,93 @@ func (s *BussSuite) Test() {
 		}
 	}
 
-	// 用户发表subject
-	for i := 1; i <= 10; i++ {
+	// 1~3号用户发表一篇subject
+	for i := 1; i <= 3; i++ {
 		body := fmt.Sprintf(`{"name":"iphone%s"}`, strconv.Itoa(i))
 		c := testPost(e, body)
 
-		auth(c, rand.Int63n(10))
+		auth(c, int64(i))
 		err := ctl.createSubject(c)
 		if err != nil {
 			assert.FailNow(s.T(), err.Error())
 		}
 	}
 
-	// 用户吐槽
-	for i := 1; i <= 100; i++ {
+	// 4~50号用户 对 2号用户 吐槽
+	for i := 4; i <= 50; i++ {
 		body := fmt.Sprintf(`{"score":%d}`, rand.Intn(9)+1)
 		c := testPost(e, body)
 		c.SetPath("/subjects/:subjectId/comments")
 		c.SetParamNames("subjectId")
-		c.SetParamValues(strconv.Itoa(rand.Intn(10)))
+		c.SetParamValues(strconv.Itoa(2))
 
-		auth(c, rand.Int63n(100))
+		auth(c, int64(i))
 		err := ctl.createSubjectComment(c)
 		if err != nil {
 			assert.FailNow(s.T(), err.Error())
 		}
 	}
 
-	var comments []SubjectComment
-	s.db.Table("subject_comment").Find(&comments)
-	fmt.Printf("%+v\n", comments)
+	// 51~80号用户 对 12号用户 吐槽
+	for i := 51; i <= 80; i++ {
+		body := fmt.Sprintf(`{"score":%d}`, rand.Intn(9)+1)
+		c := testPost(e, body)
+		c.SetPath("/subjects/:subjectId/comments")
+		c.SetParamNames("subjectId")
+		c.SetParamValues(strconv.Itoa(12))
 
-	var subjects []Subject
-	s.db.Table("subject").Find(&subjects)
-	fmt.Printf("%+v\n", subjects)
-
-	dg := simple.NewDirectedGraph()
-	for _, subject := range subjects {
-		node := graph.Node(simple.Node(subject.Id))
-		dg.AddNode(node)
-	}
-
-	for _, comment := range comments {
-		edge := simple.Edge{F: simple.Node(comment.UserId), T: simple.Node(comment.SubjectId)}
-		dg.SetEdge(edge)
-	}
-
-	var d = toFullGraph(dg, 1)
-	fmt.Printf("%+v\n", d)
-
-	main.Calc()
-
-}
-
-type Asd struct {
-	FromId int64
-	ToId   int64
-	Deep   int64
-}
-
-func iterator(
-	to bool,
-	neighbors graph.Nodes,
-	dg *simple.DirectedGraph,
-	deep int64,
-	fromId int64,
-	asdd *[]Asd,
-) {
-	if to {
-		deep++
-	} else {
-		deep--
-	}
-	for neighbors.Next() {
-		currNode := neighbors.Node()
-		var nodes graph.Nodes
-		if to {
-			*asdd = append(*asdd, Asd{
-				FromId: currNode.ID(),
-				ToId:   fromId,
-				Deep:   deep,
-			})
-			nodes = dg.To(currNode.ID())
-		} else {
-			*asdd = append(*asdd, Asd{
-				FromId: fromId,
-				ToId:   currNode.ID(),
-				Deep:   deep,
-			})
-			nodes = dg.From(currNode.ID())
+		auth(c, int64(i))
+		err := ctl.createSubjectComment(c)
+		if err != nil {
+			assert.FailNow(s.T(), err.Error())
 		}
-		iterator(to, nodes, dg, deep, currNode.ID(), asdd)
-	}
-}
-
-func toFullGraph(
-	dg *simple.DirectedGraph,
-	id int64,
-) []Asd {
-	// 获取节点的所有邻居
-	neighbors := dg.To(id)
-	neighbors2 := dg.From(id)
-
-	var asdd []Asd
-
-	iterator(false, neighbors2, dg, 0, id, &asdd)
-
-	deep2 := slices.MaxFunc(asdd, func(a, b Asd) int {
-		if a.Deep > b.Deep {
-			return 1
-		} else if a.Deep < b.Deep {
-			return -1
-		}
-		return 0
-	}).Deep
-
-	iterator(true, neighbors, dg, deep2, id, &asdd)
-
-	deep3 := slices.MinFunc(asdd, func(a, b Asd) int {
-		if a.Deep > b.Deep {
-			return 1
-		} else if a.Deep < b.Deep {
-			return -1
-		}
-		return 0
-	}).Deep
-
-	// deep补正
-	for i, _ := range asdd {
-		asdd[i].Deep += -deep3 + 1
 	}
 
-	return asdd
+	// 81~98号用户 对 67号用户 吐槽
+	for i := 81; i <= 98; i++ {
+		body := fmt.Sprintf(`{"score":%d}`, rand.Intn(9)+1)
+		c := testPost(e, body)
+		c.SetPath("/subjects/:subjectId/comments")
+		c.SetParamNames("subjectId")
+		c.SetParamValues(strconv.Itoa(67))
+
+		auth(c, int64(i))
+		err := ctl.createSubjectComment(c)
+		if err != nil {
+			assert.FailNow(s.T(), err.Error())
+		}
+	}
+
+	// 99~100号用户 对 83号用户 吐槽
+	for i := 99; i <= 100; i++ {
+		body := fmt.Sprintf(`{"score":%d}`, rand.Intn(9)+1)
+		c := testPost(e, body)
+		c.SetPath("/subjects/:subjectId/comments")
+		c.SetParamNames("subjectId")
+		c.SetParamValues(strconv.Itoa(83))
+
+		auth(c, int64(i))
+		err := ctl.createSubjectComment(c)
+		if err != nil {
+			assert.FailNow(s.T(), err.Error())
+		}
+	}
+
+	// 事实计算
+	var userScore UserScore
+	s.db.Table("user_score").Where("user_id = ?", 2).Find(&userScore)
+
+	// 直接调用底层计算
+	var comments []Comment
+	s.db.Table("subject_comment").
+		Select("subject_comment.user_id as RaterId, `subject`.created_by as UserId, subject_comment.score as score").
+		Joins("inner join `subject` on `subject`.id = `subject_comment`.subject_id").
+		Find(&comments)
+	var users []User
+	s.db.Table("user").Find(&users)
+	m := calcScore(&users, &comments)
+
+	assert.Equal(s.T(), userScore.Score, int64(m[2]*10000))
 }
 
 func (s *BussSuite) TestBaseGraph() {
@@ -219,13 +171,13 @@ func (s *BussSuite) TestBaseGraph() {
 	dg.AddNode(node8)
 
 	// 创建一条边，并指定两个端点
-	edge1 := simple.Edge{F: node4, T: node2}
-	edge2 := simple.Edge{F: node3, T: node2}
-	edge3 := simple.Edge{F: node2, T: node1}
-	edge4 := simple.Edge{F: node5, T: node1}
-	edge5 := simple.Edge{F: node6, T: node5}
-	edge6 := simple.Edge{F: node1, T: node7}
-	edge7 := simple.Edge{F: node7, T: node8}
+	edge1 := ScoreEdge{F: node4, T: node2}
+	edge2 := ScoreEdge{F: node3, T: node2}
+	edge3 := ScoreEdge{F: node2, T: node1}
+	edge4 := ScoreEdge{F: node5, T: node1}
+	edge5 := ScoreEdge{F: node6, T: node5}
+	edge6 := ScoreEdge{F: node1, T: node7}
+	edge7 := ScoreEdge{F: node7, T: node8}
 
 	// 将边添加到图中
 	dg.SetEdge(edge1)
@@ -238,6 +190,6 @@ func (s *BussSuite) TestBaseGraph() {
 
 	var asdd = toFullGraph(dg, node1.ID())
 
-	var expected = "[{FromId:1 ToId:7 Deep:1} {FromId:7 ToId:8 Deep:2} {FromId:1 ToId:2 Deep:3} {FromId:2 ToId:4 Deep:4} {FromId:2 ToId:3 Deep:4} {FromId:1 ToId:5 Deep:3} {FromId:5 ToId:6 Deep:4}]"
+	var expected = "[{FromId:1 ToId:7 Deep:2 Score:0} {FromId:7 ToId:8 Deep:1 Score:0} {FromId:2 ToId:1 Deep:3 Score:0} {FromId:4 ToId:2 Deep:4 Score:0} {FromId:3 ToId:2 Deep:4 Score:0} {FromId:5 ToId:1 Deep:3 Score:0} {FromId:6 ToId:5 Deep:4 Score:0}]"
 	assert.Equal(s.T(), expected, fmt.Sprintf("%+v", asdd))
 }

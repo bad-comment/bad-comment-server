@@ -135,6 +135,8 @@ func (ctl *controller) createSubjectComment(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
+	calcAndSave(ctl.db)
+
 	return c.JSON(http.StatusOK, comment)
 }
 

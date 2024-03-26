@@ -39,3 +39,12 @@ type UserScore struct {
 func (UserScore) TableName() string {
 	return "user_score"
 }
+
+type SubjectBloom struct {
+	UserId int64  `json:"user_id" gorm:"column:user_id;primaryKey;type:bigint"`
+	Bloom  []byte `json:"score" gorm:"column:bloom;type:blob;not null"`
+}
+
+func (SubjectBloom) TableName() string {
+	return "subject_bloom"
+}

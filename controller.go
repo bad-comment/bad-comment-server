@@ -100,13 +100,33 @@ func (ctl *controller) getSubjectByRandom(c echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	var subject Subject
-	result := ctl.db.Where("created_by <> ?", userId).Order("id desc").First(&subject)
-	if result.Error != nil {
-		return echo.ErrNotFound
+	bloom := getInitBloom(ctl.db, userId)
+	done := false
+	offset := 0
+	for !done {
+		var subjects []Subject
+		result := ctl.db.Where("created_by <> ?", userId).Order("id desc").Limit(100).Offset(offset).Find(&subjects)
+		if len(subjects) == 0 {
+			return c.JSON(http.StatusNoContent, nil)
+		}
+		if result.Error != nil {
+			return echo.ErrNotFound
+		}
+		for _, subject := range subjects {
+			var sId = uint64ToBytes(uint64(subject.Id))
+			var read = bloom.Test(sId)
+			if !read {
+				bloom.Add(sId)
+				// saveDB
+				upsertBloom(ctl.db, bloom, userId)
+				done = true
+				return c.JSON(http.StatusOK, subject)
+			}
+		}
+		offset += 100
 	}
 
-	return c.JSON(http.StatusOK, subject)
+	return c.JSON(http.StatusNoContent, nil)
 }
 
 func (ctl *controller) createSubjectComment(c echo.Context) error {

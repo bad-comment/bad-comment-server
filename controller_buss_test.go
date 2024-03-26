@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/glebarez/sqlite"
 	_ "github.com/glebarez/sqlite"
@@ -192,4 +193,10 @@ func (s *BussSuite) TestBaseGraph() {
 
 	var expected = "[{FromId:1 ToId:7 Deep:2 Score:0} {FromId:7 ToId:8 Deep:1 Score:0} {FromId:2 ToId:1 Deep:3 Score:0} {FromId:4 ToId:2 Deep:4 Score:0} {FromId:3 ToId:2 Deep:4 Score:0} {FromId:5 ToId:1 Deep:3 Score:0} {FromId:6 ToId:5 Deep:4 Score:0}]"
 	assert.Equal(s.T(), expected, fmt.Sprintf("%+v", asdd))
+}
+
+func ssss(i uint64) []byte {
+	n1 := make([]byte, 8)
+	binary.BigEndian.PutUint64(n1, i)
+	return n1
 }

@@ -2,19 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/bits-and-blooms/bloom/v3"
 	tws "github.com/muyu66/two-way-score"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"slices"
 )
 
-type Comment struct {
-	RaterId int64
-	UserId  int64
-	Score   int8
-}
-
-func calcScore(users *[]User, comments *[]Comment) map[int64]float64 {
+func calcScore(users *[]User, comments *[]SubjectComment) map[int64]float64 {
 	dg := simple.NewDirectedGraph()
 	for _, user := range *users {
 		node := graph.Node(simple.Node(user.Id))
@@ -22,7 +17,7 @@ func calcScore(users *[]User, comments *[]Comment) map[int64]float64 {
 	}
 
 	for _, comment := range *comments {
-		edge := ScoreEdge{F: simple.Node(comment.RaterId), T: simple.Node(comment.UserId), Score: comment.Score}
+		edge := ScoreEdge{F: simple.Node(comment.UserId), T: simple.Node(comment.SubjectIdCreator), Score: comment.Score}
 		dg.SetEdge(edge)
 	}
 
@@ -59,7 +54,8 @@ func toFullGraph(
 
 	var asdd = make([]Asd, 0)
 
-	iterator(false, neighbors2, dg, 0, id, &asdd)
+	filter1 := bloom.NewWithEstimates(1000, 0.01)
+	iterator(filter1, false, neighbors2, dg, 0, id, &asdd)
 
 	var deep2 int64 = 0
 	if len(asdd) > 0 {
@@ -73,7 +69,8 @@ func toFullGraph(
 		}).Deep
 	}
 
-	iterator(true, neighbors, dg, deep2, id, &asdd)
+	filter2 := bloom.NewWithEstimates(1000, 0.01)
+	iterator(filter2, true, neighbors, dg, deep2, id, &asdd)
 
 	var deep3 int64 = 0
 	if len(asdd) > 0 {
@@ -96,6 +93,7 @@ func toFullGraph(
 }
 
 func iterator(
+	filter *bloom.BloomFilter,
 	to bool,
 	neighbors graph.Nodes,
 	dg *simple.DirectedGraph,
@@ -110,6 +108,11 @@ func iterator(
 	}
 	for neighbors.Next() {
 		currNode := neighbors.Node()
+		if filter.Test(uint64ToBytes(uint64(currNode.ID()))) {
+			return
+		} else {
+			filter.Add(uint64ToBytes(uint64(currNode.ID())))
+		}
 		var nodes graph.Nodes
 		if to {
 			e := dg.Edge(currNode.ID(), fromId).(ScoreEdge)
@@ -130,7 +133,7 @@ func iterator(
 			})
 			nodes = dg.From(currNode.ID())
 		}
-		iterator(to, nodes, dg, deep, currNode.ID(), asdd)
+		iterator(filter, to, nodes, dg, deep, currNode.ID(), asdd)
 	}
 }
 

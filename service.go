@@ -65,14 +65,11 @@ func saveScore(db *gorm.DB, m *map[int64]float64) {
 }
 
 func calc(db *gorm.DB) map[int64]float64 {
-	var comments []Comment
-	db.Table("subject_comment").
-		Select("subject_comment.user_id as RaterId, `subject`.created_by as UserId, subject_comment.score as score").
-		Joins("inner join `subject` on `subject`.id = `subject_comment`.subject_id").
-		Find(&comments)
+	var subjectComments []SubjectComment
+	db.Find(&subjectComments)
 
 	var users []User
 	db.Table("user").Find(&users)
 
-	return calcScore(&users, &comments)
+	return calcScore(&users, &subjectComments)
 }

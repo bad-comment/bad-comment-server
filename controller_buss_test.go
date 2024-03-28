@@ -137,11 +137,8 @@ func (s *BussSuite) Test() {
 	s.db.Table("user_score").Where("user_id = ?", 2).Find(&userScore)
 
 	// 直接调用底层计算
-	var comments []Comment
-	s.db.Table("subject_comment").
-		Select("subject_comment.user_id as RaterId, `subject`.created_by as UserId, subject_comment.score as score").
-		Joins("inner join `subject` on `subject`.id = `subject_comment`.subject_id").
-		Find(&comments)
+	var comments []SubjectComment
+	s.db.Find(&comments)
 	var users []User
 	s.db.Table("user").Find(&users)
 	m := calcScore(&users, &comments)

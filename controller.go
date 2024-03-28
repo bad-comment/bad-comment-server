@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"net/http"
 	"strconv"
 )
@@ -141,18 +142,40 @@ func (ctl *controller) createSubjectComment(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 	subjectId, err := strconv.ParseInt(c.Param("subjectId"), 10, 64)
-	if err != nil {
+	if err != nil || subjectId <= 0 {
 		return echo.ErrBadRequest
 	}
+	// TODO: 验证subjectId是否存在
 
-	var comment = SubjectComment{
-		UserId:    userId,
-		SubjectId: subjectId,
-		Score:     body.Score,
+	var subject Subject
+	result := ctl.db.Where("id = ?", subjectId).First(&subject)
+	if result.RowsAffected == 0 {
+		return echo.ErrNotFound
 	}
-	result := ctl.db.Create(&comment)
-	if result.Error != nil {
-		return echo.ErrInternalServerError
+
+	var comment SubjectComment
+	result2 := ctl.db.Where(&SubjectComment{UserId: userId, SubjectIdCreator: subject.CreatedBy}).First(&comment)
+	if result2.RowsAffected > 0 {
+		var t1 = comment.C + 1
+		var t2 = int32(comment.Score) * comment.C
+		var t3 = t2 + int32(body.Score)
+		comment.Score = int8(t3 / t1)
+		comment.C += 1
+		ctl.db.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "user_id"}, {Name: "subject_id_creator"}},
+			DoUpdates: clause.AssignmentColumns([]string{"score", "c"}),
+		}).Create(&comment)
+	} else {
+		result3 := ctl.db.Create(&SubjectComment{
+			UserId:           userId,
+			SubjectId:        subjectId,
+			SubjectIdCreator: subject.CreatedBy,
+			Score:            body.Score,
+			C:                1,
+		})
+		if result3.Error != nil {
+			return echo.ErrInternalServerError
+		}
 	}
 
 	calcAndSave(ctl.db)

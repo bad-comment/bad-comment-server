@@ -21,10 +21,12 @@ func (Subject) TableName() string {
 }
 
 type SubjectComment struct {
-	Id        int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
-	UserId    int64 `json:"user_id" gorm:"column:user_id;type:bigint;not null"`
-	SubjectId int64 `json:"subject_id" gorm:"column:subject_id;type:bigint;not null"`
-	Score     int8  `json:"score" gorm:"column:score;type:tinyint;not null"`
+	Id               int64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	UserId           int64 `json:"user_id" gorm:"column:user_id;type:bigint;not null"`
+	SubjectId        int64 `json:"subject_id" gorm:"column:subject_id;type:bigint;not null"`
+	SubjectIdCreator int64 `json:"subject_id_creator" gorm:"column:subject_id_creator;type:bigint;not null"`
+	Score            int8  `json:"score" gorm:"column:score;type:tinyint;not null"`
+	C                int32 `json:"c" gorm:"column:c;type:int;not null"`
 }
 
 func (SubjectComment) TableName() string {

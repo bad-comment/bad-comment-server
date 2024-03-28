@@ -47,6 +47,8 @@ github.com/muyu66/two-way-score v0.0.3 h1:xLVAHmncLQEgYcWG1WUrhmxW7woiMAj0LHGQyZ
 github.com/muyu66/two-way-score v0.0.3/go.mod h1:5939MOfevTML0O3aExoMjJtHcBtYslS7GALLzDHMy60=
 github.com/muyu66/two-way-score v0.0.4 h1:ZSRRHaI0jk7zITTHRrBHuw2uRSIaptEXAZRvSFPynRE=
 github.com/muyu66/two-way-score v0.0.4/go.mod h1:5939MOfevTML0O3aExoMjJtHcBtYslS7GALLzDHMy60=
+github.com/muyu66/two-way-score v0.1.0 h1:+nuRgxIPMcvBsK21zb4/KnIKjg4I4mVsjpS3NMg4Hco=
+github.com/muyu66/two-way-score v0.1.0/go.mod h1:TDpoe3e27UnFtCNvDsBaopnskmZqrTb9DX2svUB07UQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=

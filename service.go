@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func loginService(userId int64) (AuthToken, error) {
+func loginService(userId uint64) (AuthToken, error) {
 	token, err := makeToken(userId)
 	if err != nil {
 		return AuthToken{}, err
@@ -19,7 +19,7 @@ func loginService(userId int64) (AuthToken, error) {
 	}, nil
 }
 
-func getInitBloom(db *gorm.DB, userId int64) *bloom.BloomFilter {
+func getInitBloom(db *gorm.DB, userId uint64) *bloom.BloomFilter {
 	var subjectBloom SubjectBloom
 	result := db.Where(&SubjectBloom{UserId: userId}).First(&subjectBloom)
 	filter := bloom.NewWithEstimates(10000, 0.01)
@@ -32,7 +32,7 @@ func getInitBloom(db *gorm.DB, userId int64) *bloom.BloomFilter {
 	}
 }
 
-func upsertBloom(db *gorm.DB, filter *bloom.BloomFilter, userId int64) {
+func upsertBloom(db *gorm.DB, filter *bloom.BloomFilter, userId uint64) {
 	var w = &bytes.Buffer{}
 	_, _ = filter.WriteTo(w)
 

@@ -42,11 +42,11 @@ func (ctl *controller) signUp(c echo.Context) error {
 	return c.JSON(http.StatusCreated, res)
 }
 
-func getUserId(c echo.Context) (int64, bool) {
+func getUserId(c echo.Context) (uint64, bool) {
 	if c.Get("userId") == nil {
 		return 0, false
 	}
-	return int64(c.Get("userId").(int64)), true
+	return uint64(c.Get("userId").(uint64)), true
 }
 
 func (ctl *controller) signIn(c echo.Context) error {

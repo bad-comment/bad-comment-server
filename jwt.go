@@ -6,11 +6,11 @@ import (
 )
 
 type jwtCustomClaims struct {
-	UserId int64 `json:"userId"`
+	UserId uint64 `json:"userId"`
 	jwt.RegisteredClaims
 }
 
-func makeToken(userId int64) (string, error) {
+func makeToken(userId uint64) (string, error) {
 	claims := &jwtCustomClaims{
 		userId,
 		jwt.RegisteredClaims{

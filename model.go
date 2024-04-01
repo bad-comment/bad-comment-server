@@ -1,14 +1,19 @@
 package main
 
+import (
+	"time"
+)
+
 type User struct {
-	Id       uint64 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
-	Account  string `json:"account" gorm:"column:account;type:string;not null"`
-	Password string `json:"password" gorm:"column:password;type:string;not null"`
-	Gender   uint8  `json:"gender" gorm:"column:gender;type:tinyint;not null"`
-	Name     string `json:"name" gorm:"column:name;type:string;not null"`
-	Province uint32 `json:"province" gorm:"column:province;type:int;not null"`
-	City     uint32 `json:"city" gorm:"column:city;type:int;not null"`
-	District uint32 `json:"district" gorm:"column:json;type:int;not null"`
+	Id        uint64    `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	Account   string    `json:"account" gorm:"column:account;type:string;not null"`
+	Password  string    `json:"password" gorm:"column:password;type:string;not null"`
+	Gender    uint8     `json:"gender" gorm:"column:gender;type:tinyint;not null"`
+	Name      string    `json:"name" gorm:"column:name;type:string;not null"`
+	Province  uint32    `json:"province" gorm:"column:province;type:int;not null"`
+	City      uint32    `json:"city" gorm:"column:city;type:int;not null"`
+	District  uint32    `json:"district" gorm:"column:district;type:int;not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;type:date;not null"`
 }
 
 func (User) TableName() string {
@@ -16,9 +21,10 @@ func (User) TableName() string {
 }
 
 type Subject struct {
-	Id        int64  `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
-	Name      string `json:"name" gorm:"column:name;type:string;not null"`
-	CreatedBy uint64 `json:"created_by" gorm:"column:created_by;type:bigint;not null"`
+	Id        int64     `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
+	Name      string    `json:"name" gorm:"column:name;type:string;not null"`
+	CreatedBy uint64    `json:"created_by" gorm:"column:created_by;type:bigint;not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;type:date;not null"`
 }
 
 func (Subject) TableName() string {

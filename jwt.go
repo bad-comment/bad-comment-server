@@ -10,17 +10,18 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func makeToken(userId uint64) (string, error) {
+func makeToken(userId uint64) (string, time.Time, error) {
+	var expiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * 24))
 	claims := &jwtCustomClaims{
 		userId,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			ExpiresAt: expiresAt,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte("zhuzhu"))
 	if err != nil {
-		return "", err
+		return "", expiresAt.Time, err
 	}
-	return tokenString, nil
+	return tokenString, expiresAt.Time, nil
 }

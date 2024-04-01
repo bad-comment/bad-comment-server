@@ -217,3 +217,45 @@ func (ctl *controller) getTrendingSubjects(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
+
+func (ctl *controller) getUser(c echo.Context) error {
+	var userId, ok = getUserId(c)
+	if !ok {
+		return echo.ErrUnauthorized
+	}
+
+	var user User
+	result := ctl.db.Where(&User{Id: userId}).First(&user)
+	if result.Error != nil {
+		return echo.ErrNotFound
+	}
+
+	var (
+		province = Resource{
+			Id: uint64(user.Province),
+		}
+		city = Resource{
+			Id: uint64(user.City),
+		}
+		district = Resource{
+			Id: uint64(user.District),
+		}
+	)
+	if user.District != 0 {
+		var areaInfo = getAreaInfo(user.Province, user.City, user.District)
+		province.Name = areaInfo[0]
+		city.Name = areaInfo[1]
+		district.Name = areaInfo[2]
+	}
+
+	return c.JSON(http.StatusOK, UserDTO{
+		Id:        user.Id,
+		Account:   user.Account,
+		Gender:    user.Gender,
+		Name:      user.Name,
+		Province:  province,
+		City:      city,
+		District:  district,
+		CreatedAt: user.CreatedAt,
+	})
+}
